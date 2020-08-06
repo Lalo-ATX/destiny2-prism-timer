@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Destiny 2 Prism Timer</title>
+    <style>
+        @keyframes prism {
+            0% {
+                background: #492A72;
+            }
+            33.33333% {
+                background: #492A72;
+            }
+            33.33334% {
+                background: #85C5EC;
+            }
+            66.66667% {
+                background: #85C5EC;
+            }
+            67.66666% {
+                background: #F06E1E;
+            }
+            100% {
+                background: #F06E1E;
+            }
+        }
+        
+        body,
+        html {
+            font-size: 100%;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #492A72;
+            animation: prism 90s infinite;
+        }
+        
+        h1 {
+            color: white;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 50vw;
+            text-align: center;
+        }
+		p { color: white; font-size: 10vw; text-align: center; }
+    </style>
+</head>
+
+<body onclick="context.resume()">
+	<p id="sequence"></p>
+    <h1 id="count">30</h1>
+	<p id="delayInterval"></p>
+    <script>
+        var output = document.getElementById('count');
+		var debug = document.getElementById('delayInterval');
+		var sequence = document.getElementById('sequence');
+
+		var counter = 29;
+		var d = new Date();
+		var startTime = d.getTime();
+		
+		var seqText = [
+			"VOID -> ARC",
+			"ARC -> SOLAR",
+			"SOLAR -> VOID"
+		];
+		
+		var seqIndex = 0;
+
+		var context = new AudioContext();
+		var o = null;
+		var g = null;
+		function sound(frequency, type, length){
+			o = context.createOscillator()
+			g = context.createGain()
+			o.type = type
+			o.connect(g)
+			o.frequency.value = frequency
+			g.connect(context.destination)
+			o.start(0)
+
+			g.gain.exponentialRampToValueAtTime(
+				0.00001, context.currentTime + length
+			)
+		}
+		
+		function doIt() {
+			var d = new Date();
+			var now = d.getTime();
+			
+			var howLong = now - startTime;
+			
+			var delayInterval = 1000 - howLong % 1000;
+			
+			output.innerHTML = counter;
+			sequence.innerHTML = seqText[seqIndex];
+
+			if ( counter == 29 ) {
+				sound( 880, "sine", 2 )
+			}
+
+			if ( counter <= 2 ) {
+				sound( 440, "sine", 1 )
+			}
+
+			if ( counter == 0 ) {
+				counter = 29;
+				seqIndex = ( seqIndex + 1 ) % 3;
+			} else {
+				counter--;
+			}
+			
+			var t = setTimeout( doIt, delayInterval );
+		}
+		
+		doIt();
+
+    </script>
+
+</body></html>
